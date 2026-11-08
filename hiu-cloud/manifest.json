@@ -1,0 +1,96 @@
+{
+  "id": "cn.edu.hiu.cloud",
+  "name": "龙外教学云平台",
+  "version": "1.0.1",
+  "apiVersion": 3,
+  "kind": "native",
+  "entry": "index.js",
+  "category": "study",
+  "minAppVersionCode": 114,
+  "description": "黑龙江外国语学院教学云平台（jxypt.hiu.edu.cn，BladeX 架构）：原生页面登录（账号密码+图片验证码，密码 MD5 后提交），查看待办作业与测验、作业详情与截止时间、直播课程（跳系统浏览器观看）和学情概览。当前使用离线合成数据验证协议实现，真实账号验收待登录凭据确认。",
+  "license": "GPL-3.0-only",
+  "maintainers": [
+    {
+      "name": "黑龙江外国语学院适配"
+    }
+  ],
+  "maintenance": "active",
+  "verifiedScope": [
+    "离线合成样本与场景测试（QuickJS 离线协议装置）；真实设备与真实云平台账号验收待进行（登录凭据待用户在浏览器侧确认）"
+  ],
+  "requires": [
+    {
+      "name": "network.request",
+      "version": 4
+    },
+    {
+      "name": "storage.get",
+      "version": 1
+    },
+    {
+      "name": "storage.set",
+      "version": 1
+    },
+    {
+      "name": "storage.remove",
+      "version": 1
+    },
+    {
+      "name": "files.create",
+      "version": 1
+    },
+    {
+      "name": "files.write",
+      "version": 1
+    },
+    {
+      "name": "ui.components",
+      "version": 1
+    }
+  ],
+  "capabilities": [
+    "ui.init",
+    "ui.reduce"
+  ],
+  "permissions": [
+    "network",
+    "auth",
+    "storage",
+    "files",
+    "navigation"
+  ],
+  "network": [
+    {
+      "origin": "https://jxypt.hiu.edu.cn",
+      "pathPrefix": "/api/ykt-basics/oauth",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "purposes": [
+        "auth"
+      ]
+    },
+    {
+      "origin": "https://jxypt.hiu.edu.cn",
+      "pathPrefix": "/api/ykt-site",
+      "methods": [
+        "GET"
+      ],
+      "purposes": [
+        "query"
+      ]
+    }
+  ],
+  "contributes": {
+    "pages": [
+      {
+        "id": "main",
+        "title": "教学云平台",
+        "renderer": "native"
+      }
+    ],
+    "entries": []
+  },
+  "files": {}
+}

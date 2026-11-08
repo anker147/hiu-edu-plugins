@@ -1,0 +1,852 @@
+[
+  {
+    "name": "login shows the captcha image and persists the token",
+    "pageId": "main",
+    "mocks": [
+      {
+        "capability": "network.request",
+        "input": {
+          "url": "https://jxypt.hiu.edu.cn/api/ykt-basics/oauth/captcha",
+          "purpose": "auth",
+          "headers": {
+            "accept": "application/json"
+          }
+        },
+        "result": {
+          "ok": true,
+          "data": {
+            "status": 200,
+            "url": "https://jxypt.hiu.edu.cn/api/ykt-basics/oauth/captcha",
+            "headers": {
+              "Content-Type": "application/json"
+            },
+            "body": "{\"code\":200,\"success\":true,\"data\":{\"key\":\"ck-1\",\"image\":\"data:image/png;base64,ZmFrZQ==\"}}"
+          }
+        }
+      },
+      {
+        "capability": "files.create",
+        "input": {
+          "name": "captcha.png",
+          "mime": "image/png"
+        },
+        "result": {
+          "ok": true,
+          "data": {
+            "handle": "f1",
+            "name": "captcha.png",
+            "mime": "image/png",
+            "size": 4
+          }
+        }
+      },
+      {
+        "capability": "files.write",
+        "input": {
+          "handle": "f1",
+          "base64": "ZmFrZQ=="
+        },
+        "result": {
+          "ok": true,
+          "data": {
+            "handle": "f1",
+            "name": "captcha.png",
+            "mime": "image/png",
+            "size": 4
+          }
+        }
+      },
+      {
+        "capability": "network.request",
+        "input": {
+          "url": "https://jxypt.hiu.edu.cn/api/ykt-basics/oauth/token",
+          "method": "POST",
+          "purpose": "auth",
+          "headers": {
+            "accept": "application/json"
+          },
+          "form": {
+            "grant_type": "password",
+            "scope": "all",
+            "client_id": "portal",
+            "client_secret": "portal_secret",
+            "tenantId": "000000",
+            "username": "demo01",
+            "password": "e10adc3949ba59abbe56e057f20f883e",
+            "captcha": "ck-1:1236"
+          }
+        },
+        "result": {
+          "ok": true,
+          "data": {
+            "status": 200,
+            "url": "https://jxypt.hiu.edu.cn/api/ykt-basics/oauth/token",
+            "headers": {
+              "Content-Type": "application/json"
+            },
+            "body": "{\"code\":200,\"data\":{\"token_type\":\"bearer\",\"access_token\":\"tok-1\",\"expires_in\":7200}}"
+          }
+        }
+      }
+    ],
+    "steps": [
+      {
+        "expect": {
+          "state": {
+            "screen": "login",
+            "pending": ""
+          },
+          "nodes": {
+            "captcha": {
+              "type": "image"
+            }
+          }
+        }
+      },
+      {
+        "event": {
+          "type": "input",
+          "nodeId": "user",
+          "name": "user",
+          "value": "demo01"
+        }
+      },
+      {
+        "event": {
+          "type": "input",
+          "nodeId": "pass",
+          "name": "pass",
+          "value": "123456"
+        }
+      },
+      {
+        "event": {
+          "type": "input",
+          "nodeId": "code",
+          "name": "code",
+          "value": "1236"
+        }
+      },
+      {
+        "event": {
+          "type": "click",
+          "nodeId": "login",
+          "name": "login"
+        },
+        "expect": {
+          "state": {
+            "screen": "home",
+            "pending": "",
+            "who": "demo01"
+          },
+          "nodes": {
+            "status": {
+              "textContains": "已登录"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "a rejected login re-prompts with a fresh captcha",
+    "pageId": "main",
+    "mocks": [
+      {
+        "capability": "network.request",
+        "input": {
+          "url": "https://jxypt.hiu.edu.cn/api/ykt-basics/oauth/captcha",
+          "purpose": "auth",
+          "headers": {
+            "accept": "application/json"
+          }
+        },
+        "result": {
+          "ok": true,
+          "data": {
+            "status": 200,
+            "url": "https://jxypt.hiu.edu.cn/api/ykt-basics/oauth/captcha",
+            "headers": {},
+            "body": "{\"code\":200,\"success\":true,\"data\":{\"key\":\"ck-1\",\"image\":\"data:image/png;base64,ZmFrZQ==\"}}"
+          }
+        }
+      },
+      {
+        "capability": "files.create",
+        "input": {
+          "name": "captcha.png",
+          "mime": "image/png"
+        },
+        "result": {
+          "ok": true,
+          "data": {
+            "handle": "f1",
+            "name": "captcha.png",
+            "mime": "image/png",
+            "size": 4
+          }
+        }
+      },
+      {
+        "capability": "files.write",
+        "input": {
+          "handle": "f1",
+          "base64": "ZmFrZQ=="
+        },
+        "result": {
+          "ok": true,
+          "data": {
+            "handle": "f1",
+            "name": "captcha.png",
+            "mime": "image/png",
+            "size": 4
+          }
+        }
+      },
+      {
+        "capability": "network.request",
+        "input": {
+          "url": "https://jxypt.hiu.edu.cn/api/ykt-basics/oauth/token",
+          "method": "POST",
+          "purpose": "auth",
+          "headers": {
+            "accept": "application/json"
+          },
+          "form": {
+            "grant_type": "password",
+            "scope": "all",
+            "client_id": "portal",
+            "client_secret": "portal_secret",
+            "tenantId": "000000",
+            "username": "demo01",
+            "password": "e10adc3949ba59abbe56e057f20f883e",
+            "captcha": "ck-1:0000"
+          }
+        },
+        "result": {
+          "ok": true,
+          "data": {
+            "status": 200,
+            "url": "https://jxypt.hiu.edu.cn/api/ykt-basics/oauth/token",
+            "headers": {},
+            "body": "{\"code\":400,\"error\":\"invalid_grant\",\"error_description\":\"验证码错误\"}"
+          }
+        }
+      },
+      {
+        "capability": "network.request",
+        "input": {
+          "url": "https://jxypt.hiu.edu.cn/api/ykt-basics/oauth/captcha",
+          "purpose": "auth",
+          "headers": {
+            "accept": "application/json"
+          }
+        },
+        "result": {
+          "ok": true,
+          "data": {
+            "status": 200,
+            "url": "https://jxypt.hiu.edu.cn/api/ykt-basics/oauth/captcha",
+            "headers": {},
+            "body": "{\"code\":200,\"success\":true,\"data\":{\"key\":\"ck-2\",\"image\":\"data:image/png;base64,ZmFrZQ==\"}}"
+          }
+        }
+      },
+      {
+        "capability": "files.create",
+        "input": {
+          "name": "captcha.png",
+          "mime": "image/png"
+        },
+        "result": {
+          "ok": true,
+          "data": {
+            "handle": "f2",
+            "name": "captcha.png",
+            "mime": "image/png",
+            "size": 4
+          }
+        }
+      },
+      {
+        "capability": "files.write",
+        "input": {
+          "handle": "f2",
+          "base64": "ZmFrZQ=="
+        },
+        "result": {
+          "ok": true,
+          "data": {
+            "handle": "f2",
+            "name": "captcha.png",
+            "mime": "image/png",
+            "size": 4
+          }
+        }
+      }
+    ],
+    "steps": [
+      {
+        "event": {
+          "type": "input",
+          "nodeId": "user",
+          "name": "user",
+          "value": "demo01"
+        }
+      },
+      {
+        "event": {
+          "type": "input",
+          "nodeId": "pass",
+          "name": "pass",
+          "value": "123456"
+        }
+      },
+      {
+        "event": {
+          "type": "input",
+          "nodeId": "code",
+          "name": "code",
+          "value": "0000"
+        }
+      },
+      {
+        "event": {
+          "type": "click",
+          "nodeId": "login",
+          "name": "login"
+        },
+        "expect": {
+          "state": {
+            "screen": "login",
+            "pending": "",
+            "captchaKey": "ck-2"
+          },
+          "nodes": {
+            "error": {
+              "textContains": "验证码错误"
+            },
+            "captcha": {
+              "type": "image"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "todos open a detail view and study aggregates the same data",
+    "pageId": "main",
+    "mocks": [
+      {
+        "capability": "network.request",
+        "input": {
+          "url": "https://jxypt.hiu.edu.cn/api/ykt-basics/oauth/captcha",
+          "purpose": "auth",
+          "headers": {
+            "accept": "application/json"
+          }
+        },
+        "result": {
+          "ok": true,
+          "data": {
+            "status": 200,
+            "url": "https://jxypt.hiu.edu.cn/api/ykt-basics/oauth/captcha",
+            "headers": {},
+            "body": "{\"code\":200,\"success\":true,\"data\":{\"key\":\"ck-1\",\"image\":\"data:image/png;base64,ZmFrZQ==\"}}"
+          }
+        }
+      },
+      {
+        "capability": "files.create",
+        "input": {
+          "name": "captcha.png",
+          "mime": "image/png"
+        },
+        "result": {
+          "ok": true,
+          "data": {
+            "handle": "f1",
+            "name": "captcha.png",
+            "mime": "image/png",
+            "size": 4
+          }
+        }
+      },
+      {
+        "capability": "files.write",
+        "input": {
+          "handle": "f1",
+          "base64": "ZmFrZQ=="
+        },
+        "result": {
+          "ok": true,
+          "data": {
+            "handle": "f1",
+            "name": "captcha.png",
+            "mime": "image/png",
+            "size": 4
+          }
+        }
+      },
+      {
+        "capability": "network.request",
+        "input": {
+          "url": "https://jxypt.hiu.edu.cn/api/ykt-basics/oauth/token",
+          "method": "POST",
+          "purpose": "auth",
+          "headers": {
+            "accept": "application/json"
+          },
+          "form": {
+            "grant_type": "password",
+            "scope": "all",
+            "client_id": "portal",
+            "client_secret": "portal_secret",
+            "tenantId": "000000",
+            "username": "demo01",
+            "password": "e10adc3949ba59abbe56e057f20f883e",
+            "captcha": "ck-1:1236"
+          }
+        },
+        "result": {
+          "ok": true,
+          "data": {
+            "status": 200,
+            "url": "https://jxypt.hiu.edu.cn/api/ykt-basics/oauth/token",
+            "headers": {},
+            "body": "{\"code\":200,\"data\":{\"access_token\":\"tok-1\"}}"
+          }
+        }
+      },
+      {
+        "capability": "network.request",
+        "input": {
+          "url": "https://jxypt.hiu.edu.cn/api/ykt-site/site/student/undone",
+          "purpose": "query",
+          "headers": {
+            "accept": "application/json",
+            "authorization": "Bearer tok-1"
+          }
+        },
+        "result": {
+          "ok": true,
+          "data": {
+            "status": 200,
+            "url": "https://jxypt.hiu.edu.cn/api/ykt-site/site/student/undone",
+            "headers": {},
+            "body": "{\"code\":200,\"data\":[{\"id\":\"hw1\",\"title\":\"第一次作业\",\"courseName\":\"大学计算机基础\",\"type\":\"作业\",\"endTime\":\"2026-11-05 23:59\"},{\"id\":\"qz1\",\"title\":\"第一章测验\",\"courseName\":\"大学计算机基础\",\"type\":\"测验\",\"endTime\":\"2026-11-01 20:00\"}]}"
+          }
+        }
+      },
+      {
+        "capability": "network.request",
+        "input": {
+          "url": "https://jxypt.hiu.edu.cn/api/ykt-site/assignment/student-detail?assignmentId=hw1",
+          "purpose": "query",
+          "headers": {
+            "accept": "application/json",
+            "authorization": "Bearer tok-1"
+          }
+        },
+        "result": {
+          "ok": true,
+          "data": {
+            "status": 200,
+            "url": "https://jxypt.hiu.edu.cn/api/ykt-site/assignment/student-detail?assignmentId=hw1",
+            "headers": {},
+            "body": "{\"code\":200,\"data\":{\"id\":\"hw1\",\"title\":\"第一次作业\",\"courseName\":\"大学计算机基础\",\"type\":\"作业\",\"beginTime\":\"2026-10-20 08:00\",\"endTime\":\"2026-11-05 23:59\",\"description\":\"完成第 1 章练习并提交附件。\"}}"
+          }
+        }
+      }
+    ],
+    "steps": [
+      {
+        "event": {
+          "type": "input",
+          "nodeId": "user",
+          "name": "user",
+          "value": "demo01"
+        }
+      },
+      {
+        "event": {
+          "type": "input",
+          "nodeId": "pass",
+          "name": "pass",
+          "value": "123456"
+        }
+      },
+      {
+        "event": {
+          "type": "input",
+          "nodeId": "code",
+          "name": "code",
+          "value": "1236"
+        }
+      },
+      {
+        "event": {
+          "type": "click",
+          "nodeId": "login",
+          "name": "login"
+        }
+      },
+      {
+        "event": {
+          "type": "click",
+          "nodeId": "todos",
+          "name": "todos"
+        },
+        "expect": {
+          "state": {
+            "screen": "todos"
+          },
+          "nodes": {
+            "todo-hw1": {
+              "type": "listItem",
+              "title": "第一次作业"
+            }
+          }
+        }
+      },
+      {
+        "event": {
+          "type": "click",
+          "nodeId": "todo-hw1",
+          "name": "open"
+        },
+        "expect": {
+          "state": {
+            "screen": "detail"
+          },
+          "nodes": {
+            "dtitle": {
+              "textContains": "第一次作业"
+            },
+            "dbody": {
+              "textContains": "第 1 章"
+            }
+          }
+        }
+      },
+      {
+        "event": {
+          "type": "click",
+          "nodeId": "back",
+          "name": "back"
+        },
+        "expect": {
+          "state": {
+            "screen": "todos"
+          }
+        }
+      },
+      {
+        "event": {
+          "type": "click",
+          "nodeId": "back",
+          "name": "back"
+        },
+        "expect": {
+          "state": {
+            "screen": "home"
+          }
+        }
+      },
+      {
+        "event": {
+          "type": "click",
+          "nodeId": "study",
+          "name": "study"
+        },
+        "expect": {
+          "state": {
+            "screen": "study"
+          },
+          "nodes": {
+            "note": {
+              "textContains": "待办共 2 项"
+            }
+          }
+        }
+      },
+      {
+        "event": {
+          "type": "click",
+          "nodeId": "back",
+          "name": "back"
+        },
+        "expect": {
+          "state": {
+            "screen": "home"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "live courses open in the system browser and logout resets",
+    "pageId": "main",
+    "mocks": [
+      {
+        "capability": "network.request",
+        "input": {
+          "url": "https://jxypt.hiu.edu.cn/api/ykt-basics/oauth/captcha",
+          "purpose": "auth",
+          "headers": {
+            "accept": "application/json"
+          }
+        },
+        "result": {
+          "ok": true,
+          "data": {
+            "status": 200,
+            "url": "https://jxypt.hiu.edu.cn/api/ykt-basics/oauth/captcha",
+            "headers": {},
+            "body": "{\"code\":200,\"success\":true,\"data\":{\"key\":\"ck-1\",\"image\":\"data:image/png;base64,ZmFrZQ==\"}}"
+          }
+        }
+      },
+      {
+        "capability": "files.create",
+        "input": {
+          "name": "captcha.png",
+          "mime": "image/png"
+        },
+        "result": {
+          "ok": true,
+          "data": {
+            "handle": "f1",
+            "name": "captcha.png",
+            "mime": "image/png",
+            "size": 4
+          }
+        }
+      },
+      {
+        "capability": "files.write",
+        "input": {
+          "handle": "f1",
+          "base64": "ZmFrZQ=="
+        },
+        "result": {
+          "ok": true,
+          "data": {
+            "handle": "f1",
+            "name": "captcha.png",
+            "mime": "image/png",
+            "size": 4
+          }
+        }
+      },
+      {
+        "capability": "network.request",
+        "input": {
+          "url": "https://jxypt.hiu.edu.cn/api/ykt-basics/oauth/token",
+          "method": "POST",
+          "purpose": "auth",
+          "headers": {
+            "accept": "application/json"
+          },
+          "form": {
+            "grant_type": "password",
+            "scope": "all",
+            "client_id": "portal",
+            "client_secret": "portal_secret",
+            "tenantId": "000000",
+            "username": "demo01",
+            "password": "e10adc3949ba59abbe56e057f20f883e",
+            "captcha": "ck-1:1236"
+          }
+        },
+        "result": {
+          "ok": true,
+          "data": {
+            "status": 200,
+            "url": "https://jxypt.hiu.edu.cn/api/ykt-basics/oauth/token",
+            "headers": {},
+            "body": "{\"code\":200,\"data\":{\"access_token\":\"tok-1\"}}"
+          }
+        }
+      },
+      {
+        "capability": "network.request",
+        "input": {
+          "url": "https://jxypt.hiu.edu.cn/api/ykt-site/web/live/course-list",
+          "purpose": "query",
+          "headers": {
+            "accept": "application/json",
+            "authorization": "Bearer tok-1"
+          }
+        },
+        "result": {
+          "ok": true,
+          "data": {
+            "status": 200,
+            "url": "https://jxypt.hiu.edu.cn/api/ykt-site/web/live/course-list",
+            "headers": {},
+            "body": "{\"code\":200,\"data\":[{\"id\":\"lv1\",\"name\":\"云课堂直播·第 8 周\",\"courseName\":\"数据结构\",\"liveBeginTime\":\"2026-11-02 08:00\",\"url\":\"https://jxypt.hiu.edu.cn/#/live/1001\"}]}"
+          }
+        }
+      },
+      {
+        "capability": "navigation.url",
+        "input": {
+          "url": "https://jxypt.hiu.edu.cn/#/live/1001"
+        },
+        "result": {
+          "ok": true,
+          "data": null
+        }
+      },
+      {
+        "capability": "network.request",
+        "input": {
+          "url": "https://jxypt.hiu.edu.cn/api/ykt-basics/oauth/captcha",
+          "purpose": "auth",
+          "headers": {
+            "accept": "application/json"
+          }
+        },
+        "result": {
+          "ok": true,
+          "data": {
+            "status": 200,
+            "url": "https://jxypt.hiu.edu.cn/api/ykt-basics/oauth/captcha",
+            "headers": {},
+            "body": "{\"code\":200,\"success\":true,\"data\":{\"key\":\"ck-9\",\"image\":\"data:image/png;base64,ZmFrZQ==\"}}"
+          }
+        }
+      },
+      {
+        "capability": "files.create",
+        "input": {
+          "name": "captcha.png",
+          "mime": "image/png"
+        },
+        "result": {
+          "ok": true,
+          "data": {
+            "handle": "f9",
+            "name": "captcha.png",
+            "mime": "image/png",
+            "size": 4
+          }
+        }
+      },
+      {
+        "capability": "files.write",
+        "input": {
+          "handle": "f9",
+          "base64": "ZmFrZQ=="
+        },
+        "result": {
+          "ok": true,
+          "data": {
+            "handle": "f9",
+            "name": "captcha.png",
+            "mime": "image/png",
+            "size": 4
+          }
+        }
+      }
+    ],
+    "steps": [
+      {
+        "event": {
+          "type": "input",
+          "nodeId": "user",
+          "name": "user",
+          "value": "demo01"
+        }
+      },
+      {
+        "event": {
+          "type": "input",
+          "nodeId": "pass",
+          "name": "pass",
+          "value": "123456"
+        }
+      },
+      {
+        "event": {
+          "type": "input",
+          "nodeId": "code",
+          "name": "code",
+          "value": "1236"
+        }
+      },
+      {
+        "event": {
+          "type": "click",
+          "nodeId": "login",
+          "name": "login"
+        }
+      },
+      {
+        "event": {
+          "type": "click",
+          "nodeId": "lives",
+          "name": "lives"
+        },
+        "expect": {
+          "state": {
+            "screen": "lives"
+          },
+          "nodes": {
+            "live-0": {
+              "type": "listItem",
+              "title": "云课堂直播·第 8 周"
+            }
+          }
+        }
+      },
+      {
+        "event": {
+          "type": "click",
+          "nodeId": "live-0",
+          "name": "watch"
+        },
+        "expect": {
+          "nodes": {
+            "status": {
+              "textContains": "已在系统浏览器打开"
+            }
+          }
+        }
+      },
+      {
+        "event": {
+          "type": "click",
+          "nodeId": "back",
+          "name": "back"
+        },
+        "expect": {
+          "state": {
+            "screen": "home"
+          }
+        }
+      },
+      {
+        "event": {
+          "type": "click",
+          "nodeId": "logout",
+          "name": "logout"
+        },
+        "expect": {
+          "state": {
+            "screen": "login",
+            "token": "",
+            "pending": ""
+          },
+          "nodes": {
+            "user": {
+              "type": "input"
+            }
+          }
+        }
+      }
+    ]
+  }
+]

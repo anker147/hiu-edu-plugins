@@ -1,0 +1,11 @@
+{
+  "lockVersion": 1,
+  "libraries": [
+    {
+      "name": "academic-protocols",
+      "version": "3.2.3",
+      "sha256": "73f2667b0b3e8b3ec83095acd3725940fb19e09ef276018ba9a6a48648cc3379",
+      "path": "../../protocols/3.2.3"
+    }
+  ]
+}

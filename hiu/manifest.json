@@ -1,0 +1,46 @@
+{
+  "id": "cn.edu.hiu.academic",
+  "name": "黑龙江外国语学院",
+  "version": "1.3.2",
+  "apiVersion": 3,
+  "kind": "extension",
+  "extends": "builtin.qz_old",
+  "capabilities": [
+    "auth.start",
+    "auth.resume",
+    "auth.refreshCaptcha",
+    "auth.validate",
+    "study.terms",
+    "study.schedule"
+  ],
+  "network": [
+    {
+      "origin": "https://jwxt.hiu.edu.cn",
+      "pathPrefix": "/jsxsd/",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "purposes": [
+        "auth",
+        "query",
+        "mutation"
+      ]
+    }
+  ],
+  "school": {
+    "id": "cn.edu.hiu",
+    "name": "黑龙江外国语学院",
+    "domain": "jwxt.hiu.edu.cn",
+    "protocol": "https",
+    "basePath": "/jsxsd",
+    "academicSystem": "qz_old",
+    "allowedAcademicHosts": [
+      "jwxt.hiu.edu.cn",
+      "cas.hiu.edu.cn"
+    ]
+  },
+  "description": "黑龙江外国语学院教务一体化系统（强智旧版）适配：学校网页完成登录后，从登录设置页提取学号与姓名完成身份校验，复用内置旧强智教务查询。",
+  "entry": "index.js",
+  "files": {}
+}

@@ -1,0 +1,397 @@
+[
+  {
+    "name": "Captcha challenge on start",
+    "operation": "auth.start",
+    "args": {
+      "username": "fictional123",
+      "password": "fictional-password"
+    },
+    "http": [
+      {
+        "url": "https://jwxt.hiu.edu.cn/jsxsd/verifycode.servlet",
+        "purpose": "auth",
+        "response": {
+          "url": "https://jwxt.hiu.edu.cn/jsxsd/verifycode.servlet",
+          "status": 200,
+          "headers": {
+            "Content-Type": "image/jpeg"
+          },
+          "body": "ZmFrZS1qcGVnLWJhc2U2NA=="
+        }
+      }
+    ],
+    "capture": "start",
+    "expectSubset": {
+      "ok": true,
+      "data": {
+        "status": "captcha",
+        "mimeType": "image/jpeg"
+      }
+    }
+  },
+  {
+    "name": "Refresh captcha keeps continuation",
+    "operation": "auth.refreshCaptcha",
+    "args": {
+      "continuationId": {
+        "$ref": "start.continuationId"
+      }
+    },
+    "http": [
+      {
+        "url": "https://jwxt.hiu.edu.cn/jsxsd/verifycode.servlet",
+        "purpose": "auth",
+        "response": {
+          "url": "https://jwxt.hiu.edu.cn/jsxsd/verifycode.servlet",
+          "status": 200,
+          "headers": {
+            "Content-Type": "image/png"
+          },
+          "body": "ZmFrZS1wbmctYmFzZTY0"
+        }
+      }
+    ],
+    "expectSubset": {
+      "ok": true,
+      "data": {
+        "status": "captcha",
+        "mimeType": "image/png"
+      }
+    }
+  },
+  {
+    "name": "Login with captcha reaches identity in a single request",
+    "operation": "auth.resume",
+    "args": {
+      "continuationId": {
+        "$ref": "start.continuationId"
+      },
+      "captcha": "1234"
+    },
+    "http": [
+      {
+        "url": "https://jwxt.hiu.edu.cn/jsxsd/xk/LoginToXk",
+        "purpose": "auth",
+        "method": "POST",
+        "response": {
+          "url": "https://jwxt.hiu.edu.cn/jsxsd/framework/xsMain.htmlx",
+          "status": 200,
+          "headers": {},
+          "body": "<div>学期理论课表</div><div class=\"userInfo\"><p style=\"font-weight: 500;\">模拟同学</p><span style=\"font-size: 12px;color:#888888\">学生</span></div><a>退出登录</a>"
+        }
+      }
+    ],
+    "expect": {
+      "ok": true,
+      "data": {
+        "status": "authenticated",
+        "studentId": "fictional123",
+        "studentName": "模拟同学"
+      }
+    }
+  },
+  {
+    "name": "Expired continuation",
+    "operation": "auth.resume",
+    "args": {
+      "continuationId": "expired"
+    },
+    "expect": {
+      "ok": false,
+      "error": {
+        "code": "SESSION_EXPIRED",
+        "message": "登录验证已过期，请重新开始"
+      }
+    }
+  },
+  {
+    "name": "Second start issues a fresh continuation",
+    "operation": "auth.start",
+    "args": {
+      "username": "fictional123",
+      "password": "fictional-password"
+    },
+    "http": [
+      {
+        "url": "https://jwxt.hiu.edu.cn/jsxsd/verifycode.servlet",
+        "purpose": "auth",
+        "response": {
+          "url": "https://jwxt.hiu.edu.cn/jsxsd/verifycode.servlet",
+          "status": 200,
+          "headers": {
+            "Content-Type": "image/jpeg"
+          },
+          "body": "ZmFrZS1qcGVnLWJhc2U2NA=="
+        }
+      }
+    ],
+    "capture": "restart",
+    "expectSubset": {
+      "ok": true,
+      "data": {
+        "status": "captcha",
+        "mimeType": "image/jpeg"
+      }
+    }
+  },
+  {
+    "name": "Resume falls back to profile page when the login response lacks identity",
+    "operation": "auth.resume",
+    "args": {
+      "continuationId": {
+        "$ref": "restart.continuationId"
+      },
+      "captcha": "1234"
+    },
+    "http": [
+      {
+        "url": "https://jwxt.hiu.edu.cn/jsxsd/xk/LoginToXk",
+        "purpose": "auth",
+        "method": "POST",
+        "response": {
+          "url": "https://jwxt.hiu.edu.cn/jsxsd/framework/xsMain.htmlx",
+          "status": 200,
+          "headers": {},
+          "body": "<div>学期理论课表</div><a>退出登录</a>"
+        }
+      },
+      {
+        "url": "https://jwxt.hiu.edu.cn/jsxsd/grsz/grsz_xggrxx.do?type=dlym",
+        "purpose": "query",
+        "response": {
+          "url": "https://jwxt.hiu.edu.cn/jsxsd/grsz/grsz_xggrxx.do?type=dlym",
+          "status": 200,
+          "headers": {},
+          "body": "<input name=\"account\" id=\"account\" value=\"fictional123\"/><input name=\"realName\" id=\"realName\" value=\"模拟同学\"/>"
+        }
+      }
+    ],
+    "expect": {
+      "ok": true,
+      "data": {
+        "status": "authenticated",
+        "studentId": "fictional123",
+        "studentName": "模拟同学"
+      }
+    }
+  },
+  {
+    "name": "Expired refresh",
+    "operation": "auth.refreshCaptcha",
+    "args": {
+      "continuationId": "expired"
+    },
+    "expect": {
+      "ok": false,
+      "error": {
+        "code": "SESSION_EXPIRED",
+        "message": "登录验证已过期，请重新开始"
+      }
+    }
+  },
+  {
+    "name": "Session expired on main frame",
+    "operation": "auth.validate",
+    "http": [
+      {
+        "url": "https://jwxt.hiu.edu.cn/jsxsd/framework/xsMain.jsp",
+        "purpose": "query",
+        "response": {
+          "url": "https://jwxt.hiu.edu.cn/jsxsd/framework/xsMain.jsp",
+          "status": 200,
+          "headers": {},
+          "body": "<form id=\"loginForm\"><input name=\"userAccount\"><input name=\"userPassword\"></form>"
+        }
+      }
+    ],
+    "expect": {
+      "ok": false,
+      "error": {
+        "code": "SESSION_EXPIRED",
+        "message": "黑龙江外国语学院教务登录已失效"
+      }
+    }
+  },
+  {
+    "name": "Validate reads identity from the main frame in a single request",
+    "operation": "auth.validate",
+    "http": [
+      {
+        "url": "https://jwxt.hiu.edu.cn/jsxsd/framework/xsMain.jsp",
+        "purpose": "query",
+        "response": {
+          "url": "https://jwxt.hiu.edu.cn/jsxsd/framework/xsMain.jsp",
+          "status": 200,
+          "headers": {},
+          "body": "<div>学期理论课表</div><div class=\"userInfo\"><p style=\"font-weight: 500;\">模拟同学</p></div><a>退出登录</a>"
+        }
+      }
+    ],
+    "expect": {
+      "ok": true,
+      "data": {
+        "status": "authenticated",
+        "studentId": "fictional123",
+        "studentName": "模拟同学"
+      }
+    }
+  },
+  {
+    "name": "Imported academic identity",
+    "operation": "auth.validate",
+    "http": [
+      {
+        "url": "https://jwxt.hiu.edu.cn/jsxsd/framework/xsMain.jsp",
+        "purpose": "query",
+        "response": {
+          "url": "https://jwxt.hiu.edu.cn/jsxsd/framework/xsMain.jsp",
+          "status": 200,
+          "headers": {},
+          "body": "<div>学期理论课表</div><a>退出登录</a>"
+        }
+      },
+      {
+        "url": "https://jwxt.hiu.edu.cn/jsxsd/grsz/grsz_xggrxx.do?type=dlym",
+        "purpose": "query",
+        "response": {
+          "url": "https://jwxt.hiu.edu.cn/jsxsd/grsz/grsz_xggrxx.do?type=dlym",
+          "status": 200,
+          "headers": {},
+          "body": "<input name=\"account\" id=\"account\" value=\"fictional123\"/><input name=\"realName\" id=\"realName\" value=\"模拟同学\"/>"
+        }
+      }
+    ],
+    "expect": {
+      "ok": true,
+      "data": {
+        "status": "authenticated",
+        "studentId": "fictional123",
+        "studentName": "模拟同学"
+      }
+    }
+  },
+  {
+    "name": "Terms from schedule page",
+    "operation": "study.terms",
+    "args": {},
+    "http": [
+      {
+        "url": "https://jwxt.hiu.edu.cn/jsxsd/xskb/xskb_list.do",
+        "purpose": "query",
+        "response": {
+          "url": "https://jwxt.hiu.edu.cn/jsxsd/xskb/xskb_list.do",
+          "status": 200,
+          "headers": {},
+          "body": "<html><body><form name=\"Form1\" id=\"Form1\" action=\"\" method=\"post\"><select name=\"xnxq01id\" id=\"xnxq01id\"><option value=\"2025-2026-2\">2025-2026-2</option><option value=\"2025-2026-1\" selected>2025-2026-1</option></select><select name=\"zc\"><option value=\"\"></option></select><select name=\"kbjcmsid\"><option value=\"1\">1</option></select></form></body></html>"
+        }
+      },
+      {
+        "url": "https://jwxt.hiu.edu.cn/jsxsd/framework/xsMain.jsp",
+        "purpose": "query",
+        "response": {
+          "url": "https://jwxt.hiu.edu.cn/jsxsd/framework/xsMain.jsp",
+          "status": 200,
+          "headers": {},
+          "body": "<html><body></body></html>"
+        }
+      },
+      {
+        "url": "https://jwxt.hiu.edu.cn/jsxsd/kscj/cjcx_frm",
+        "purpose": "query",
+        "response": {
+          "url": "https://jwxt.hiu.edu.cn/jsxsd/kscj/cjcx_frm",
+          "status": 200,
+          "headers": {},
+          "body": "<html><body>系统提示</body></html>"
+        }
+      }
+    ],
+    "expect": {
+      "ok": true,
+      "data": {
+        "currentId": "2025-2026-1",
+        "items": [
+          {
+            "id": "2025-2026-2",
+            "name": "2025-2026 第2学期",
+            "semester": 2,
+            "year": 2025
+          },
+          {
+            "id": "2025-2026-1",
+            "name": "2025-2026 第1学期",
+            "semester": 1,
+            "year": 2025
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Schedule for selected term",
+    "operation": "study.schedule",
+    "args": {
+      "termId": "2025-2026-1"
+    },
+    "http": [
+      {
+        "url": "https://jwxt.hiu.edu.cn/jsxsd/xskb/xskb_list.do",
+        "purpose": "query",
+        "method": "GET",
+        "response": {
+          "url": "https://jwxt.hiu.edu.cn/jsxsd/xskb/xskb_list.do",
+          "status": 200,
+          "headers": {},
+          "body": "<html><body><form name=\"Form1\" id=\"Form1\" action=\"\" method=\"post\"><select name=\"xnxq01id\" id=\"xnxq01id\"><option value=\"2025-2026-2\">2025-2026-2</option><option value=\"2025-2026-1\" selected>2025-2026-1</option></select><select name=\"zc\"><option value=\"\"></option></select><select name=\"kbjcmsid\"><option value=\"1\">1</option></select></form></body></html>"
+        }
+      },
+      {
+        "url": "https://jwxt.hiu.edu.cn/jsxsd/xskb/xskb_list.do",
+        "purpose": "query",
+        "method": "POST",
+        "response": {
+          "url": "https://jwxt.hiu.edu.cn/jsxsd/xskb/xskb_list.do",
+          "status": 200,
+          "headers": {},
+          "body": "<html><body><form name=\"Form1\" action=\"\" method=\"post\"><select name=\"xnxq01id\"><option value=\"2025-2026-2\">2025-2026-2</option><option value=\"2025-2026-1\" selected>2025-2026-1</option></select></form><table><tr><td>节次</td><th>星期一</th><th>星期二</th></tr><tr><td>第1节</td><td><div id=\"s-1-1\" class=\"kbcontent1\">高等数学<br/>1-16周(周)<br/>第1,2节</div><div id=\"s-1-2\" style=\"display:none\" class=\"kbcontent\">高等数学<br/>1-16周(周)<br/>第1,2节</div></td><td><div class=\"kbcontent\">&nbsp;</div></td></tr></table></body></html>"
+        }
+      }
+    ],
+    "expect": {
+      "ok": true,
+      "data": {
+        "termId": "2025-2026-1",
+        "maxWeeks": 25,
+        "entries": [
+          {
+            "day": 1,
+            "endPeriod": 2,
+            "id": "2915b3e1:高等数学|1|1|2|1-16周",
+            "location": "",
+            "name": "高等数学",
+            "startPeriod": 1,
+            "teacher": "",
+            "weeks": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15,
+              16
+            ]
+          }
+        ]
+      }
+    }
+  }
+]

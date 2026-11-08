@@ -1,0 +1,242 @@
+[
+  {
+    "name": "init lands on login and restores the saved token",
+    "operation": "ui.init",
+    "args": {
+      "pageId": "main",
+      "params": {}
+    },
+    "expectSubset": {
+      "ok": true,
+      "data": {
+        "state": {
+          "screen": "login",
+          "status": "正在读取登录状态…"
+        },
+        "effects": [
+          {
+            "id": "load.1",
+            "capability": "storage.get",
+            "version": 1,
+            "input": {
+              "key": "token"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a restored token goes straight to the home screen",
+    "operation": "ui.reduce",
+    "args": {
+      "pageId": "main",
+      "state": {
+        "screen": "login",
+        "status": "正在读取登录状态…",
+        "serial": 1,
+        "pending": "load.1",
+        "user": "",
+        "pass": "",
+        "code": "",
+        "captchaKey": "",
+        "capHandle": "",
+        "capB64": "",
+        "token": "",
+        "who": "",
+        "wantStudy": false,
+        "todos": [],
+        "detail": null,
+        "lives": [],
+        "studyNote": "",
+        "errorNote": ""
+      },
+      "event": {
+        "type": "effect.result",
+        "effectId": "load.1",
+        "result": {
+          "ok": true,
+          "data": "tok-demo"
+        }
+      }
+    },
+    "expectSubset": {
+      "ok": true,
+      "data": {
+        "state": {
+          "screen": "home",
+          "pending": "",
+          "token": "tok-demo"
+        }
+      }
+    }
+  },
+  {
+    "name": "without a token the plugin fetches the platform captcha",
+    "operation": "ui.reduce",
+    "args": {
+      "pageId": "main",
+      "state": {
+        "screen": "login",
+        "status": "正在读取登录状态…",
+        "serial": 2,
+        "pending": "load.2",
+        "user": "",
+        "pass": "",
+        "code": "",
+        "captchaKey": "",
+        "capHandle": "",
+        "capB64": "",
+        "token": "",
+        "who": "",
+        "wantStudy": false,
+        "todos": [],
+        "detail": null,
+        "lives": [],
+        "studyNote": "",
+        "errorNote": ""
+      },
+      "event": {
+        "type": "effect.result",
+        "effectId": "load.2",
+        "result": {
+          "ok": true,
+          "data": null
+        }
+      }
+    },
+    "expectSubset": {
+      "ok": true,
+      "data": {
+        "effects": [
+          {
+            "id": "cap.3",
+            "capability": "network.request",
+            "version": 4,
+            "input": {
+              "url": "https://jxypt.hiu.edu.cn/api/ykt-basics/oauth/captcha",
+              "purpose": "auth",
+              "headers": {
+                "accept": "application/json"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "login submits the MD5 password digest and form-portal credentials",
+    "operation": "ui.reduce",
+    "args": {
+      "pageId": "main",
+      "state": {
+        "screen": "login",
+        "status": "请输入账号、密码和图片验证码。",
+        "serial": 5,
+        "pending": "",
+        "user": "demo01",
+        "pass": "123456",
+        "code": "1236",
+        "captchaKey": "ck-demo",
+        "capHandle": "f1",
+        "capB64": "",
+        "token": "",
+        "who": "",
+        "wantStudy": false,
+        "todos": [],
+        "detail": null,
+        "lives": [],
+        "studyNote": "",
+        "errorNote": ""
+      },
+      "event": {
+        "type": "click",
+        "nodeId": "login",
+        "name": "login"
+      }
+    },
+    "expectSubset": {
+      "ok": true,
+      "data": {
+        "effects": [
+          {
+            "id": "token.6",
+            "capability": "network.request",
+            "version": 4,
+            "input": {
+              "url": "https://jxypt.hiu.edu.cn/api/ykt-basics/oauth/token",
+              "method": "POST",
+              "purpose": "auth",
+              "headers": {
+                "accept": "application/json"
+              },
+              "form": {
+                "grant_type": "password",
+                "scope": "all",
+                "client_id": "portal",
+                "client_secret": "portal_secret",
+                "tenantId": "000000",
+                "username": "demo01",
+                "password": "e10adc3949ba59abbe56e057f20f883e",
+                "captcha": "ck-demo:1236"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "todo list requests carry the bearer token",
+    "operation": "ui.reduce",
+    "args": {
+      "pageId": "main",
+      "state": {
+        "screen": "home",
+        "status": "已登录 demo01。",
+        "serial": 7,
+        "pending": "",
+        "user": "demo01",
+        "pass": "",
+        "code": "",
+        "captchaKey": "ck-demo",
+        "capHandle": "f1",
+        "capB64": "",
+        "token": "tok-demo",
+        "who": "demo01",
+        "wantStudy": false,
+        "todos": [],
+        "detail": null,
+        "lives": [],
+        "studyNote": "",
+        "errorNote": ""
+      },
+      "event": {
+        "type": "click",
+        "nodeId": "todos",
+        "name": "todos"
+      }
+    },
+    "expectSubset": {
+      "ok": true,
+      "data": {
+        "effects": [
+          {
+            "id": "undone.8",
+            "capability": "network.request",
+            "version": 4,
+            "input": {
+              "url": "https://jxypt.hiu.edu.cn/api/ykt-site/site/student/undone",
+              "purpose": "query",
+              "headers": {
+                "accept": "application/json",
+                "authorization": "Bearer tok-demo"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+]
